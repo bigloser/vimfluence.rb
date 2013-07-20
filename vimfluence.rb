@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'etc'
+require 'nokogiri'
+require 'tempfile'
+require 'xmlrpc/client'
+
+SPACE = ARGV[0]
+PAGE = ARGV[1]
+URL = ENV["WIKI_URL"]
+WIKI_USER = ENV["WIKI_USER"] || Etc.getlogin
+WIKI_PASS = ENV["WIKI_PASS"] || `security find-generic-password -g -w -s #{ENV["WIKI_PASS_KEYCHAIN_KEY"]}`.strip
+client = XMLRPC::Client.new2("#{URL}/rpc/xmlrpc")
+client.http_header_extra = {"Accept-Encoding" => "identity"}
+client = client.proxy("confluence2")
+token = client.login(WIKI_USER, WIKI_PASS)
+page = client.getPage(token, SPACE, PAGE)
+file = Tempfile.new(["#{SPACE}-#{PAGE}", '.xml'])
+old_content = page["content"]
+file.write(old_content)
+system("vim '#{file.path}'")
+new_content = File.read(file.path)
+unless old_content.eql? new_content
+  page["content"] = new_content
+  client.storePage(token, page)
+  `open #{page["url"]}`
+end
+file.unlink
+client.logout(token)
