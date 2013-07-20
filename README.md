@@ -5,7 +5,7 @@ Pure ruby version of https://github.com/orlandov/vimfluence
 
 To use:
 
-`vimfluence.rb: vimfluence.rb PageSpace "Wiki Page"`
+`vimfluence PageSpace "Wiki Page"`
 
 Settings:
 
