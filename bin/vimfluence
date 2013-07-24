@@ -20,6 +20,7 @@ page = client.getPage(token, SPACE, PAGE)
 file = Tempfile.new(["#{SPACE}-#{PAGE}", ".#{WIKI_EXTENSION}"])
 old_content = page["content"]
 file.write(old_content)
+file.flush
 system("#{EDITOR} '#{file.path}'")
 new_content = File.read(file.path)
 unless old_content.eql? new_content
