@@ -25,8 +25,16 @@ system("#{EDITOR} '#{file.path}'")
 new_content = File.read(file.path)
 unless old_content.eql? new_content
   page["content"] = new_content
-  client.storePage(token, page)
+  begin
+    client.storePage(token, page)
+  rescue => e
+    filename = "output#{Time.now.to_i}.confluencewiki"
+    File.open(filename, "w") do |f|
+      f.write(new_content)
+    end
+    puts "failure saving page..., content saved to: #{filename}"
+  end
   `open #{page["url"]}`
 end
-file.unlink
 client.logout(token)
+file.close!
